@@ -1,146 +1,16 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A Chrome extension that streamlines ShipStation customs entry and supports a careful Yami order migration workflow.">
-  <title>ShipStation Auto-Filler — Less repetitive shipping work</title>
-  <style>
-    :root { --ink:#12211d; --muted:#5d6e68; --paper:#f9faf6; --mist:#edf3ed; --line:#d7e2d8; --lime:#cbfb45; --green:#176b4b; --deep:#0b2e23; --coral:#ef8564; }
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body { margin:0; color:var(--ink); background:var(--paper); font:16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    a { color:inherit; }
-    .shell { width:min(1120px, calc(100% - 40px)); margin:auto; }
-    .eyebrow { margin:0 0 14px; color:var(--green); font-size:.76rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
-    .button { display:inline-flex; align-items:center; gap:.55rem; border:1px solid var(--deep); border-radius:999px; padding:.8rem 1.1rem; background:var(--deep); color:white; font-weight:750; text-decoration:none; transition:transform .18s, background .18s; }
-    .button:hover { transform:translateY(-2px); background:#164838; }
-    .button.alt { background:transparent; color:var(--ink); border-color:var(--line); }
-    .button.alt:hover { background:white; }
-    header { position:relative; overflow:hidden; background:var(--deep); color:white; }
-    header::after { content:""; position:absolute; width:620px; height:620px; right:-240px; top:-270px; border-radius:50%; background:var(--lime); opacity:.95; }
-    nav { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:24px 0; }
-    .brand { display:flex; align-items:center; gap:.65rem; font-weight:800; letter-spacing:-.03em; text-decoration:none; }
-    .brand-mark { display:grid; width:30px; height:30px; place-items:center; background:var(--lime); color:var(--deep); border-radius:9px; font-size:1.05rem; }
-    nav ul { display:flex; gap:24px; list-style:none; margin:0; padding:0; font-size:.9rem; }
-    nav a { color:#d9ebe1; text-decoration:none; }
-    nav a:hover { color:white; }
-    .hero { position:relative; z-index:1; display:grid; grid-template-columns:1.15fr .85fr; gap:54px; padding:76px 0 86px; }
-    h1 { max-width:700px; margin:0; font-size:clamp(2.8rem, 6vw, 5.3rem); line-height:.97; letter-spacing:-.07em; }
-    .hero h1 em { color:var(--lime); font-style:normal; }
-    .hero-copy { max-width:620px; color:#c5d7ce; font-size:1.1rem; }
-    .hero-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:27px; }
-    .hero .alt { color:white; border-color:#557568; }
-    .pilot { align-self:end; padding:28px; border:1px solid #41685a; background:rgba(255,255,255,.08); backdrop-filter:blur(8px); border-radius:18px; }
-    .pilot strong { display:block; margin-bottom:7px; color:var(--lime); font-size:.9rem; letter-spacing:.06em; text-transform:uppercase; }
-    .pilot p { margin:0; color:#d9ebe1; font-size:.95rem; }
-    section { padding:92px 0; }
-    h2 { max-width:710px; margin:0 0 16px; font-size:clamp(2rem, 4vw, 3.5rem); line-height:1.03; letter-spacing:-.055em; }
-    .lead { max-width:660px; margin:0; color:var(--muted); font-size:1.08rem; }
-    .features { display:grid; grid-template-columns:repeat(3, 1fr); gap:17px; margin-top:42px; }
-    .feature { min-height:260px; padding:28px; border:1px solid var(--line); border-radius:16px; background:white; }
-    .icon { display:grid; width:42px; height:42px; margin-bottom:42px; place-items:center; border-radius:12px; background:var(--mist); color:var(--green); font-weight:900; font-size:1.3rem; }
-    .feature h3 { margin:0 0 9px; font-size:1.2rem; letter-spacing:-.03em; }
-    .feature p { margin:0; color:var(--muted); font-size:.95rem; }
-    .how { background:var(--mist); }
-    .steps { display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; margin-top:45px; }
-    .step { position:relative; padding:23px 20px 22px; border-top:2px solid var(--green); }
-    .number { display:block; margin-bottom:31px; color:var(--green); font-weight:800; font-size:.84rem; letter-spacing:.1em; }
-    .step h3 { margin:0 0 8px; font-size:1.1rem; letter-spacing:-.025em; }
-    .step p { margin:0; color:var(--muted); font-size:.93rem; }
-    .safety { display:grid; grid-template-columns:.8fr 1.2fr; gap:66px; align-items:center; }
-    .safety-card { padding:34px; border-radius:18px; background:var(--coral); color:#361b11; transform:rotate(-1.5deg); }
-    .safety-card p { margin:0; font-weight:700; font-size:1.32rem; line-height:1.25; letter-spacing:-.03em; }
-    .safety-list { display:grid; gap:15px; margin-top:25px; }
-    .safety-list div { display:flex; gap:12px; align-items:flex-start; color:var(--muted); }
-    .check { flex:0 0 auto; display:grid; width:23px; height:23px; place-items:center; border-radius:50%; background:var(--lime); color:var(--deep); font-size:.8rem; font-weight:900; }
-    .faq { max-width:820px; }
-    details { border-bottom:1px solid var(--line); }
-    summary { display:flex; justify-content:space-between; gap:20px; padding:21px 0; cursor:pointer; list-style:none; font-weight:760; letter-spacing:-.015em; }
-    summary::-webkit-details-marker { display:none; }
-    summary::after { content:"+"; color:var(--green); font-size:1.35rem; font-weight:400; }
-    details[open] summary::after { content:"–"; }
-    details p { max-width:690px; margin:0 0 22px; color:var(--muted); }
-    .cta { padding:70px 0; background:var(--green); color:white; text-align:center; }
-    .cta h2 { margin:0 auto 15px; }
-    .cta p { max-width:570px; margin:0 auto 25px; color:#d9ebe1; }
-    .cta .button { background:var(--lime); color:var(--deep); border-color:var(--lime); }
-    footer { padding:26px 0; color:var(--muted); font-size:.86rem; }
-    footer .shell { display:flex; justify-content:space-between; gap:20px; }
-    @media (max-width:760px) { nav ul { display:none; } .hero, .safety { grid-template-columns:1fr; gap:32px; } .hero { padding:55px 0 60px; } .features, .steps { grid-template-columns:1fr; } .feature { min-height:0; } .icon { margin-bottom:24px; } section { padding:65px 0; } .safety-card { transform:none; } }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="shell">
-      <nav aria-label="Primary navigation">
-        <a class="brand" href="#top"><span class="brand-mark">↗</span> ShipStation Auto-Filler</a>
-        <ul><li><a href="#features">Features</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#faq">FAQ</a></li></ul>
-      </nav>
-      <div class="hero" id="top">
-        <div>
-          <p class="eyebrow" style="color:var(--lime)">Chrome extension · active testing</p>
-          <h1>Less repeat work.<br><em>More confident</em> shipping.</h1>
-          <p class="hero-copy">A focused Chrome extension for a ShipStation workflow: complete customs information quickly, catch expensive mistakes before label creation, and move selected Yami orders into the next stage of fulfillment.</p>
-          <div class="hero-actions"><a class="button" href="#how-it-works">See how it works <span>↓</span></a><a class="button alt" href="https://github.com/lauming1111/shipstation-auto-filler" target="_blank" rel="noopener">View on GitHub</a></div>
-        </div>
-        <aside class="pilot">
-          <strong>Testing release</strong>
-          <p>Built for a real merchant workflow and being refined in day-to-day use. Always review the information on screen before saving an order or purchasing postage.</p>
-        </aside>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <section id="features"><div class="shell">
-      <p class="eyebrow">What it helps with</p>
-      <h2>Built around the moments where shipping data goes wrong.</h2>
-      <p class="lead">The extension stays in the browser alongside the systems your team already uses. No server, no separate dashboard, and no manual copy-and-paste loop.</p>
-      <div class="features">
-        <article class="feature"><div class="icon">↻</div><h3>Customs, filled consistently</h3><p>Choose an item type and enter parcel measurements. The in-page card fills the customs description, HS code, item value, quantity, weight, and dimensions on the ShipStation order.</p></article>
-        <article class="feature"><div class="icon">✓</div><h3>Deliberate safety checks</h3><p>Address issues, missing services, Canadian destinations, and high live rates are surfaced before a label is created—so the operator stays in control.</p></article>
-        <article class="feature"><div class="icon">→</div><h3>Order migration support</h3><p>Move selected Yami orders into ShipStation or begin a Chit Chats shipment, reducing repeated recipient entry while leaving shipping choices to the operator.</p></article>
-      </div>
-    </div></section>
-
-    <section class="how" id="how-it-works"><div class="shell">
-      <p class="eyebrow">How to use it</p>
-      <h2>From unpacked extension to a completed order.</h2>
-      <div class="steps">
-        <article class="step"><span class="number">01</span><h3>Load it in Chrome</h3><p>Open <code>chrome://extensions</code>, enable Developer mode, choose <strong>Load unpacked</strong>, and select the project folder.</p></article>
-        <article class="step"><span class="number">02</span><h3>Open an order</h3><p>Sign in to ShipStation and open an order detail page. The customs card appears at the right; the toolbar icon can reopen it.</p></article>
-        <article class="step"><span class="number">03</span><h3>Enter parcel details</h3><p>Select the item type, then add weight and L × W × H. The extension detects the order quantity and prepares the declaration.</p></article>
-        <article class="step"><span class="number">04</span><h3>Review, then act</h3><p>Use Auto Fill to populate the page. Confirm every field and resolve any warning before you save an order or create a label.</p></article>
-      </div>
-    </div></section>
-
-    <section><div class="shell safety">
-      <div class="safety-card"><p>Automation should make judgment easier—not remove it.</p></div>
-      <div>
-        <p class="eyebrow">Designed for careful operations</p>
-        <h2>Helpful automation with a human checkpoint.</h2>
-        <div class="safety-list">
-          <div><span class="check">✓</span><span>Everything runs locally in Chrome; the extension has no separate application server or telemetry.</span></div>
-          <div><span class="check">✓</span><span>Label creation remains an explicit operator action, with focused checks around address status and rate changes.</span></div>
-          <div><span class="check">✓</span><span>Chit Chats migration intentionally stops before postage purchase, leaving the final fulfillment decision with the user.</span></div>
-        </div>
-      </div>
-    </div></section>
-
-    <section id="faq"><div class="shell faq">
-      <p class="eyebrow">FAQ</p>
-      <h2>Common questions</h2>
-      <details><summary>Is this available in the Chrome Web Store?</summary><p>Not currently. This is an active testing release distributed as an unpacked Chrome extension. It is loaded locally from its project folder.</p></details>
-      <details><summary>Does it create labels automatically?</summary><p>No. It can prepare customs data and help guide the workflow, but creating a label remains a deliberate action. The extension checks relevant conditions and asks for confirmation when appropriate.</p></details>
-      <details><summary>Which sites does it support?</summary><p>The core workflow runs on ShipStation. It also supports selected-order migration from the Yami seller portal and a recipient-first Chit Chats workflow.</p></details>
-      <details><summary>Where do my credentials go?</summary><p>Credentials are entered by the operator for their own accounts. When API settings are used, the extension stores them encrypted at rest in the Chrome profile and the settings screen does not display saved values.</p></details>
-      <details><summary>What should I do after changing the extension?</summary><p>At <code>chrome://extensions</code>, reload the unpacked extension first. Then hard-refresh the target site tab. Reloading only the page may keep an older extension build active.</p></details>
-      <details><summary>Why does the card say “Limited mode”?</summary><p>The extension checks this site every few minutes. While the site is reachable and its status file says the tool is enabled, everything works. If the site cannot be reached, or the tool has been switched off here, the extension pauses auto-fill, label creation and migrations and keeps only the address-verification check running. It recovers on its own once the site is back.</p></details>
-    </div></section>
-
-    <section class="cta"><div class="shell"><h2>Make the shipping desk a little calmer.</h2><p>Explore the test build, installation notes, and ongoing development on GitHub.</p><a class="button" href="https://github.com/lauming1111/shipstation-auto-filler" target="_blank" rel="noopener">Open the repository ↗</a></div></section>
-  </main>
-  <footer><div class="shell"><span>ShipStation Auto-Filler</span><span>Built for a tested, operator-led fulfillment workflow.</span></div></footer>
-</body>
-</html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ParcelFill</title>
+<style>
+  body { margin:0; min-height:100vh; display:grid; place-items:center;
+         background:#f9faf6; color:#12211d; text-align:center; padding:24px;
+         font:16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color:#176b4b; }
+</style>
+<div>
+  <p><strong>ParcelFill</strong></p>
+  <p>The site has moved to <a href="https://parcelfill-prod.ml-business-supply.workers.dev">https://parcelfill-prod.ml-business-supply.workers.dev</a>.</p>
+  <p style="color:#5d6e68; font-size:.9rem">This address now serves only the extension's status file.</p>
+</div>
